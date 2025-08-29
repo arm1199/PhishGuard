@@ -1,0 +1,1245 @@
+<!--
+  PhishGuard Assistant MVP
+  Author: Arman Ter-Stepanyan
+  Description: Real-time phishing detection chat assistant for safe online communication.
+  Last updated: 2025-08-29
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>PhishGuard Assistant (MVP)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+  .typing-dots {
+  display: inline-block;
+  font-size: 1.5em;
+  letter-spacing: 2px;
+}
+.typing-dots span {
+  animation: blink 1.2s infinite;
+  opacity: 0.5;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.5; }
+  40% { opacity: 1; }
+}
+.info-box, .dashboard, .education, .reporting, .slider-container, .chat, #onboardingModal > div, #aboutMeModal > div, #aboutPGModal > div, #problemModal > div, #solutionModal > div, #quizModal > div {
+  background: rgba(35,39,68,0.72);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #5666ff22;
+  box-shadow: 0 8px 32px #0006;
+}
+.composer input[type=text], .chat, .msg, .stat-box {
+  background: rgba(21,25,49,0.85);
+  backdrop-filter: blur(6px);
+}
+  body {
+    font-family: 'Inter', Arial, sans-serif;
+    background: linear-gradient(135deg, #0f1220 60%, #232744 100%);
+    color: #e7e9ee;
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #181c34;
+    padding: 0 32px;
+    height: 70px;
+    box-shadow: 0 2px 12px #0002;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    animation: slideDown 0.7s cubic-bezier(.77,0,.18,1);
+  }
+  @keyframes slideDown {
+    from { transform: translateY(-60px); opacity: 0;}
+    to { transform: translateY(0); opacity: 1;}
+  }
+  .main-header .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .main-header img {
+    height: 44px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #0004;
+    background: #fff;
+  }
+  .main-header h1 {
+    font-size: 1.5em;
+    margin: 0;
+    letter-spacing: 1px;
+    color: #fff;
+    font-weight: 600;
+    text-shadow: 0 2px 8px #0002;
+  }
+  .nav {
+    display: flex;
+    gap: 24px;
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    color: #e7e9ee;
+    font-size: 1em;
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    outline: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .nav-btn:hover, .nav-btn:focus {
+    background: linear-gradient(90deg,#5666ff 60%,#3a47b8 100%);
+    color: #fff;
+    transform: translateY(-2px) scale(1.08);
+    box-shadow: 0 2px 12px #5666ff44;
+  }
+  .wrap {
+    max-width: 980px;
+    margin: 32px auto 0 auto;
+    padding: 24px;
+    animation: fadeIn 1.2s;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(40px);}
+    to { opacity: 1; transform: translateY(0);}
+  }
+  .section {
+    margin-bottom: 32px;
+    animation: fadeInUp 1s;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px);}
+    to { opacity: 1; transform: translateY(0);}
+  }
+  .info-box, .dashboard, .education, .reporting {
+    background: rgba(35,39,68,0.98);
+    padding: 18px 22px;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px #0002;
+    backdrop-filter: blur(2px);
+    margin-bottom: 18px;
+  }
+  h1,h2 { margin-top:0; font-weight: 600;}
+  .chat {
+    background: #151931;
+    border: 1px solid #232744;
+    border-radius: 18px;
+    padding: 18px;
+    height: 52vh;
+    overflow-y: auto;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 24px #0002;
+    position: relative;
+    transition: box-shadow 0.2s;
+  }
+  .chat:focus-within {
+    box-shadow: 0 8px 32px #5666ff33;
+  }
+  .msg-row {
+    display: flex;
+    margin: 12px 0;
+    align-items: flex-end;
+    animation: fadeInMsg 0.5s;
+  }
+  @keyframes fadeInMsg {
+    from { opacity: 0; transform: translateY(20px);}
+    to { opacity: 1; transform: translateY(0);}
+  }
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #5666ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    color: #fff;
+    margin-right: 10px;
+    box-shadow: 0 2px 8px #5666ff33;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .avatar.me {
+    background: #2a315b;
+    margin-left: 10px;
+    margin-right: 0;
+    box-shadow: 0 2px 8px #2a315b33;
+  }
+  .avatar .call-icon {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    background: #232744;
+    border-radius: 50%;
+    padding: 3px;
+    font-size: 0.8em;
+    color: #f9a825;
+    box-shadow: 0 2px 8px #0002;
+  }
+  .msg {
+    max-width: 75%;
+    padding: 12px 18px 28px 18px;
+    border-radius: 12px;
+    line-height: 1.5;
+    position: relative;
+    font-size: 1.05rem;
+    min-width: 120px;
+    word-break: break-word;
+    box-shadow: 0 2px 8px #0002;
+    transition: box-shadow 0.2s;
+  }
+  .me { background: linear-gradient(90deg,#2a315b 80%,#5666ff 100%); margin-left:auto; color:#e7e9ee; border-bottom-right-radius: 4px; align-self: flex-end;}
+  .friend { background: linear-gradient(90deg,#1c2344 80%,#5666ff33 100%); margin-right:auto; color:#e7e9ee; border-bottom-left-radius: 4px; align-self: flex-start;}
+  .warn {
+    border: 1.5px solid #ff6b6b;
+    background: linear-gradient(90deg,#3d1a1a 80%,#c62828 100%);
+    color: #fff;
+    margin: 0 auto;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px #c6282840;
+    font-weight: 600;
+    animation: shake 0.5s;
+  }
+  @keyframes shake {
+    0% { transform: translateX(0);}
+    20% { transform: translateX(-4px);}
+    40% { transform: translateX(4px);}
+    60% { transform: translateX(-2px);}
+    80% { transform: translateX(2px);}
+    100% { transform: translateX(0);}
+  }
+  .timestamp {
+    font-size: 0.85em;
+    color: #a6a9c9;
+    position: absolute;
+    bottom: 6px;
+    right: 18px;
+    background: rgba(20,20,40,0.7);
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .msg.me .timestamp { right: 18px; }
+  .msg.friend .timestamp { left: 18px; }
+  .msg.warn .timestamp { left: 18px; }
+  .composer {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    animation: fadeInUp 1s;
+  }
+  input[type=text] {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1.5px solid #232744;
+    background: #151931;
+    color: #e7e9ee;
+    font-size: 1.05em;
+    transition: border 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input[type=text]:focus {
+    border: 1.5px solid #5666ff;
+    box-shadow: 0 2px 8px #5666ff33;
+  }
+  button {
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 0;
+    background: linear-gradient(90deg,#5666ff 60%,#3a47b8 100%);
+    color: white;
+    cursor: pointer;
+    font-size: 1.05em;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px #5666ff33;
+  }
+  button:hover, button:focus {
+    background: linear-gradient(90deg,#3a47b8 60%,#5666ff 100%);
+    transform: scale(1.06);
+    box-shadow: 0 4px 16px #5666ff44;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-right: 8px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
+  .low { background: #2e7d32; color: #fff; }
+  .med { background: #f9a825; color: #111; }
+  .high { background: #c62828; color: #fff; }
+  .alert-list { margin: 8px 0 0 0; padding: 0; list-style: none; }
+  .alert-list li { margin: 0 0 2px 0; font-size: 0.98em; }
+  .stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .stat-box {
+    flex: 1;
+    min-width: 120px;
+    background: #151931;
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px #0002;
+    font-size: 1.1em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .slider-container {
+    background: #232744;
+    border-radius: 14px;
+    padding: 24px 18px 18px 18px;
+    max-width: 600px;
+    margin: 0 auto 24px auto;
+    box-shadow: 0 4px 24px #0004;
+    animation: fadeInUp 1.2s;
+  }
+  .slider {
+    position: relative;
+    min-height: 320px;
+  }
+  .slide {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.5s;
+  }
+  .slide.active {
+    display: flex;
+  }
+  .slider-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .slider-btn {
+    background: #5666ff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .slider-btn:hover {
+    background: #3a47b8;
+    transform: scale(1.08);
+  }
+  /* Responsive */
+  @media (max-width: 700px) {
+    .wrap { padding: 8px; }
+    .main-header { flex-direction: column; height: auto; padding: 12px 8px;}
+    .main-header .logo { flex-direction: column; gap: 4px;}
+    .nav { gap: 10px; }
+    .chat { padding: 8px; }
+    .msg { font-size: 0.98em; }
+    .slider-container { padding: 10px 4px 10px 4px;}
+  }
+  .main-footer {
+  background: linear-gradient(90deg,#181c34 60%,#232744 100%);
+  color: #e7e9ee;
+  padding: 28px 0 16px 0;
+  box-shadow: 0 -2px 12px #0002;
+  margin-top: 48px;
+  font-size: 1em;
+  animation: fadeInUp 1.2s;
+}
+.footer-content {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.footer-links {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.footer-btn {
+  background: none;
+  border: none;
+  color: #e7e9ee;
+  font-size: 1em;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.footer-btn:hover, .footer-btn:focus {
+  background: linear-gradient(90deg,#5666ff 60%,#3a47b8 100%);
+  color: #fff;
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 2px 12px #5666ff44;
+}
+.footer-info {
+  margin-top: 6px;
+  font-size: 0.98em;
+  color: #a6a9c9;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  .footer-content { padding: 0 8px; }
+  .footer-links { gap: 8px; }
+  .footer-info { flex-direction: column; gap: 4px; }
+}
+</style>
+</head>
+<body>
+
+<header class="main-header">
+  <div class="logo">
+    <img src="{{ url_for('static', filename='images/MainLogo.jpg') }}" alt="logo">
+    <h1>PhishGuard Assistant</h1>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn" onclick="showAboutMe()">About Me</button>
+    <button class="nav-btn" onclick="showAboutPG()">About PhishGuard</button>
+    <button class="nav-btn" onclick="showProblem()">Problem</button>
+    <button class="nav-btn" onclick="showSolution()">Solution</button>
+    <button class="nav-btn" onclick="openQuiz()">Quiz</button>
+  </nav>
+</header>
+
+<div class="wrap">
+    
+<section class="hero-section">
+  <div class="hero-content">
+    <h1>Protect Yourself from Phishing in Real Time</h1>
+    <p>PhishGuard Assistant analyzes your messages instantly and alerts you to scams before you click.</p>
+    <button class="cta-btn" onclick="document.getElementById('chat').scrollIntoView({behavior:'smooth'})">
+      Try the Demo <i class="fa-solid fa-arrow-down"></i>
+    </button>
+  </div>
+</section>
+<style>
+ .composer {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  margin-bottom: 32px; /* Make this bigger for more space */
+  animation: fadeInUp 1s;
+}
+.hero-section {
+  background: linear-gradient(120deg, #5666ff 60%, #232744 100%);
+  color: #fff;
+  border-radius: 18px;
+  margin-bottom: 36px;
+  padding: 48px 24px 36px 24px;
+  text-align: center;
+  box-shadow: 0 4px 24px #0003;
+  animation: fadeIn 1.2s;
+}
+.hero-content h1 {
+  font-size: 2.3em;
+  font-weight: 700;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+.hero-content p {
+  font-size: 1.2em;
+  margin-bottom: 22px;
+}
+.cta-btn {
+  background: #fff;
+  color: #5666ff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 32px;
+  font-size: 1.1em;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #5666ff33;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.cta-btn:hover {
+  background: #f9a825;
+  color: #232744;
+  transform: scale(1.06);
+}
+</style>
+    
+
+    <!-- Onboarding Modal -->
+<div id="onboardingModal" style="display:flex; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,24,40,0.96); z-index:2000; align-items:center; justify-content:center; transition:opacity 0.5s;">
+  <div style="background:#232744; color:#e7e9ee; max-width:420px; margin:auto; padding:36px 32px 28px 32px; border-radius:18px; box-shadow:0 8px 32px #0008; position:relative; text-align:center; animation:fadeIn 1s;">
+    <h2 style="margin-top:0; font-size:2em;"><i class="fa-solid fa-shield-halved" style="color:#5666ff"></i> Welcome to PhishGuard!</h2>
+    <div id="onboardingStep" style="margin:24px 0 18px 0; font-size:1.15em;">
+      <span id="onboardingText">PhishGuard helps you spot phishing and scam messages in real time.</span>
+    </div>
+    <button id="onboardingNext" style="padding:10px 24px; border-radius:8px; border:0; background:#5666ff; color:white; font-size:1em; cursor:pointer;">Next</button>
+  </div>
+</div>
+
+ 
+  
+
+  <!-- Slider Section -->
+  <div class="section" style="margin-bottom:32px;">
+    <div class="slider-container">
+      <div class="slider" id="infoSlider">
+        <!-- Slide 1: Phishing Risks & Stats -->
+        <div class="slide">
+          <h2><i class="fa-solid fa-chart-pie" style="color:#f9a825"></i> Phishing: Global Risks & Stats</h2>
+          <img src="{{ url_for('static', filename='images/phishing.jpg') }}" alt="Phishing Stats" style="width:100%; max-width:340px; border-radius:12px; margin-bottom:12px;">
+          <ul>
+            <h3>Phishing attacks have evolved into one of the most pervasive and financially damaging cyber threats worldwide. Here’s a snapshot of the current landscape:</h3>
+            <li> Phishing causes over <strong>90%</strong> of data breaches worldwide.
+            <li>Scammers target <strong>2.5B Gmail</strong>  accounts with fake alerts in <strong>2024</strong>.
+            <li>Instagram, Telegram, and WhatsApp face <strong>85K</strong> scams yearly.
+            <li>Phishing is responsible for over <strong>90%</strong> of data breaches worldwide.</li>
+            <li>Many attacks threaten to leak private photos for money.</li>
+            <li>Over <strong>50%</strong>of social media scams use manipulative messages</li>
+            <li>Users fall for phishing in just <strong>60</strong> seconds on average.</li>
+
+          </ul>
+        </div>
+        <!-- Slide 2: Risks for Young People -->
+        <div class="slide">
+          <h2><i class="fa-solid fa-user-graduate" style="color:#5666ff"></i> Why Students & Young Professionals?</h2>
+          <img src="{{ url_for('static', filename='images/education.jpg') }}" alt="Education" style="width:100%; max-width:340px; border-radius:12px; margin-bottom:12px;">
+          <ul>
+            <h3>Young users are frequent targets of phishing scams, fake job offers, and manipulative messages. University emails, social media DMs, and a lack of online experience make them  vulnerable to  psychological manipulation.</h3>
+            <li>Young users are frequent targets of online phishing scams.</li>
+            <li>Fake job offers trick students into sharing personal data.</li>
+            <li>University emails and DMs are exploited by cybercriminals.</li>
+            <li>Social media platforms are common channels for scams.</li>
+            <li>Psychological pressure makes young users vulnerable online.</li>
+            <li>Many scams exploit fear, urgency, and lack of experience.</li>
+            <li>Students often underestimate the risks of online sharing.</li>
+
+          </ul>
+        </div>
+        <!-- Slide 3: The Future of PhishGuard -->
+        <div class="slide">
+          <h2><i class="fa-solid fa-rocket" style="color:#f9a825"></i> The Future of PhishGuard</h2>
+          <img src="{{ url_for('static', filename='images/future.jpg') }}" alt="Future" style="width:100%; max-width:340px; border-radius:12px; margin-bottom:12px;">
+          <ul>
+            <h3>PhishGuard aims to evolve into a fully connected cybersecurity assistant, protecting users across all digital platforms. Future plans include detecting AI-generated voices in calls, analyzing suspicious messages in real time, and integrating seamlessly with popular applications to provide continuous, proactive protection. The goal is to create a unified system that keeps users safe, educated, and confident online.</h3>
+            <li>AI-powered detection for more languages and platforms.</li>
+            <li>Browser extension and mobile app integration.</li>
+            <li>Community reporting and real-time threat sharing.</li>
+            <li>Educational modules and gamified learning for users.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="slider-controls">
+        <button class="slider-btn" onclick="prevSlide()"><i class="fa-solid fa-arrow-left"></i></button>
+        <span id="slideIndicator" style="margin:0 12px; font-weight:bold;">1 / 3</span>
+        <button class="slider-btn" onclick="nextSlide()"><i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Dashboard -->
+  <div class="section dashboard">
+    <h2><i class="fa-solid fa-gauge-high" style="color:#f9a825"></i> Dashboard</h2>
+    <div class="stats">
+      <div class="stat-box"><i class="fa-regular fa-message"></i><br><strong id="msgCount">0</strong><br>Messages</div>
+      <div class="stat-box"><i class="fa-solid fa-triangle-exclamation" style="color:#f9a825"></i><br><strong id="alertCount">0</strong><br>Alerts</div>
+      <div class="stat-box"><i class="fa-solid fa-fire-flame-curved" style="color:#c62828"></i><br><strong id="highCount">0</strong><br>High Risk</div>
+    </div>
+  </div>
+
+    <!-- Chat -->
+<div id="chat" class="chat"></div>
+<div class="composer">
+  <input id="msg" type="text" placeholder="Type a message..." autocomplete="off" />
+  <button id="sendBtn"><i class="fa-solid fa-paper-plane"></i> Send</button>
+  <button id="restartBtn" style="display:none; margin-left:10px; background:#f9a825; color:#232744;">Restart</button>
+  
+</div>
+
+
+<!-- Suggestion Box -->
+<div id="suggestionBox" style="background:#fffbe7; color:#232744; border-radius:12px; box-shadow:0 2px 12px #23274422; padding:18px 20px; font-size:1.08em; margin-bottom:24px; margin-top:32px;">
+  <b>PhishGuard Suggestion:</b>
+  <div id="suggestionText" style="margin-top:8px;">You will see suggestions here.</div>
+</div>
+  
+<div class="section" style="margin-bottom:32px;">
+  <h2><i class="fa-solid fa-flask"></i> Link Analyzer Demo</h2>
+  <p>
+    <b>Note:</b> This analyzer is a simple demo and <span style="color:#c62828;font-weight:bold;">cannot guarantee 100% detection</span> of all phishing or scam links.<br>
+    It checks for suspicious keywords and patterns, but real attackers can use tricks to bypass basic checks.<br>
+    <br>
+    <b>Try it yourself:</b> Copy one of the links below and paste it into the analyzer!
+  </p>
+  <div style="margin-top:12px;">
+    <b>Safe links:</b>
+    <ul>
+      <li><code>https://www.google.com</code></li>
+      <li><code>https://www.university.edu</code></li>
+      <li><code>https://github.com/</code></li>
+    </ul>
+    <b>Suspicious links:</b>
+    <ul>
+      <li><code>https://secure-login123.xyz</code></li>
+      <li><code>https://paypal.com.verify-user.info</code></li>
+      <li><code>http://yourbank-login.com/reset</code></li>
+    </ul>
+  </div>
+  <p style="margin-top:10px;font-size:0.98em;color:#888;">
+    <i>Tip: Try pasting both safe and suspicious links to see how the analyzer responds!</i>
+  </p>
+</div>
+<!-- link analyzer -->
+<div class="section" style="margin-bottom:32px;">
+  <h2><i class="fa-solid fa-link"></i> Link Analyzer</h2>
+  <input id="linkInput" type="text" placeholder="Paste a link here..." style="width:60%;padding:10px;border-radius:8px;border:1.5px solid #232744;">
+  <button id="analyzeLinkBtn" style="padding:10px 18px;border-radius:8px;background:#5666ff;color:#fff;font-weight:600;margin-left:10px;">Analyze</button>
+  <div id="linkAnalysisResult" style="margin-top:14px;font-size:1.1em;"></div>
+</div>
+
+  <!-- Reporting -->
+  <div class="section reporting">
+    <h2><i class="fa-solid fa-file-arrow-down" style="color:#5666ff"></i> Reporting</h2>
+    <button onclick="exportAlerts()"><i class="fa-solid fa-download"></i> Export Suspicious Logs</button>
+    <pre id="exportBox" style="white-space:pre-wrap; font-size:12px; margin-top:10px;"></pre>
+  </div>
+
+  <!-- Education -->
+  <div class="section education">
+    <h2><i class="fa-solid fa-graduation-cap" style="color:#f9a825"></i> Stay Safe Online</h2>
+    <ul>
+      <li><i class="fa-solid fa-lock"></i> Never share your password or PIN with anyone.</li>
+      <li><i class="fa-solid fa-link"></i> Look carefully at website links before clicking.</li>
+      <li><i class="fa-solid fa-university"></i> Banks and services will never ask for your credentials via chat.</li>
+      <li><i class="fa-solid fa-bolt"></i> Phishing often creates urgency ("Act now or lose access").</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- Modals for each button -->
+<div id="aboutMeModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,24,40,0.92); z-index:1000; align-items:center; justify-content:center;">
+  <div style="background:#232744; color:#e7e9ee; max-width:480px; margin:auto; padding:32px 28px 24px 28px; border-radius:16px; box-shadow:0 8px 32px #0008; position:relative;">
+    <button onclick="closeModal('aboutMeModal')" style="position:absolute; top:12px; right:16px; background:none; border:none; color:#fff; font-size:1.5em; cursor:pointer;">&times;</button>
+    <h2 style="margin-top:0;">About Me</h2>
+    <p>
+      Hi! I'm <strong>Arman Ter-Stepanyan</strong>, a 2nd-year Informatics and Applied Mathematics student at the French University in Armenia (UFAR).<br><br>
+      I'm passionate about technology, cybersecurity, and building tools that make the internet safer for everyone—especially students and young professionals who are often targeted by phishing and online scams.<br><br>
+      I have a strong technical foundation in Python, C, and software development, and I've built several web prototypes and MVPs (including this demo of PhishGuard). I love learning fast and taking initiative—recently, I even took 2nd place in a hackathon on AI for Good by creating a Demo MVP Ai Assistant  for University.<br><br>
+      Right now, I'm focused on building the core prototype for PhishGuard and getting feedback from early users. I'm always open to mentorship and collaboration with experts in cybersecurity, AI, and product design to make this solution even stronger.<br><br>
+      <em>Thank you for trying PhishGuard! If you have suggestions or want to collaborate, please reach out—I'd love to connect.</em>
+    </p>
+  </div>
+</div>
+<div id="aboutPGModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,24,40,0.92); z-index:1000; align-items:center; justify-content:center;">
+  <div style="background:#232744; color:#e7e9ee; max-width:480px; margin:auto; padding:32px 28px 24px 28px; border-radius:16px; box-shadow:0 8px 32px #0008; position:relative;">
+    <button onclick="closeModal('aboutPGModal')" style="position:absolute; top:12px; right:16px; background:none; border:none; color:#fff; font-size:1.5em; cursor:pointer;">&times;</button>
+    <h2 style="margin-top:0;">About PhishGuard</h2>
+    <p>
+      <strong>PhishGuard Assistant</strong> is a real-time phishing detection chat assistant.<br>
+      It monitors conversations and alerts the user immediately if suspicious messages are detected.<br>
+      The goal is to help users recognize and avoid phishing attempts in a friendly, interactive way.
+    </p>
+  </div>
+</div>
+<div id="problemModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,24,40,0.92); z-index:1000; align-items:center; justify-content:center;">
+  <div style="background:#232744; color:#e7e9ee; max-width:480px; margin:auto; padding:32px 28px 24px 28px; border-radius:16px; box-shadow:0 8px 32px #0008; position:relative;">
+    <button onclick="closeModal('problemModal')" style="position:absolute; top:12px; right:16px; background:none; border:none; color:#fff; font-size:1.5em; cursor:pointer;">&times;</button>
+    <h2 style="margin-top:0;">Problem</h2>
+    <p>
+      Phishing is a major cybersecurity threat. Many people fall victim to fake messages and websites every day.<br>
+      <br>
+      <strong>PhishGuard Assistant</strong> aims to educate and protect users by providing real-time detection and alerts for suspicious messages, making online communication safer for everyone.
+    </p>
+  </div>
+</div>
+<div id="solutionModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,24,40,0.92); z-index:1000; align-items:center; justify-content:center;">
+  <div style="background:#232744; color:#e7e9ee; max-width:480px; margin:auto; padding:32px 28px 24px 28px; border-radius:16px; box-shadow:0 8px 32px #0008; position:relative;">
+    <button onclick="closeModal('solutionModal')" style="position:absolute; top:12px; right:16px; background:none; border:none; color:#fff; font-size:1.5em; cursor:pointer;">&times;</button>
+    <h2 style="margin-top:0;">Solution</h2>
+    <p>
+      <strong>PhishGuard Assistant</strong> provides a real-time chat-based interface that analyzes incoming messages for phishing risks.<br><br>
+      <ul>
+        <li>Detects suspicious keywords and links in chat conversations.</li>
+        <li>Alerts users instantly if a message is risky, with a clear risk level.</li>
+        <li>Educates users on safe online behavior and how to spot phishing.</li>
+        <li>Allows exporting of suspicious logs for review or reporting.</li>
+      </ul>
+      <br>
+      This solution empowers users to make safer decisions and avoid falling victim to phishing attacks.
+    </p>
+  </div>
+</div>
+
+<script>
+// Slider logic
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+const indicator = document.getElementById('slideIndicator');
+function showSlide(idx) {
+  slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+  indicator.textContent = `${idx+1} / ${slides.length}`;
+}
+function prevSlide() {
+  currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+  showSlide(currentSlide);
+}
+function nextSlide() {
+  currentSlide = (currentSlide + 1) % slides.length;
+  showSlide(currentSlide);
+}
+if (slides.length) showSlide(0);
+
+// Modal logic
+function showAboutMe() {
+  document.getElementById('aboutMeModal').style.display = 'flex';
+}
+function showAboutPG() {
+  document.getElementById('aboutPGModal').style.display = 'flex';
+}
+function showProblem() {
+  document.getElementById('problemModal').style.display = 'flex';
+}
+function showSolution() {
+  document.getElementById('solutionModal').style.display = 'flex';
+}
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+['aboutMeModal','aboutPGModal','problemModal','solutionModal'].forEach(id => {
+  const modal = document.getElementById(id);
+  modal.onclick = function(e) {
+    if (e.target === modal) closeModal(id);
+  };
+});
+
+// Chat logic
+const chat = document.getElementById('chat');
+const input = document.getElementById('msg');
+const sendBtn = document.getElementById('sendBtn');
+let msgCount=0, alertCount=0, highCount=0;
+let alertLogs=[];
+
+function updateDashboard(){
+  document.getElementById('msgCount').textContent=msgCount;
+  document.getElementById('alertCount').textContent=alertCount;
+  document.getElementById('highCount').textContent=highCount;
+}
+
+function exportAlerts(){
+  document.getElementById('exportBox').textContent = alertLogs.join("\n") || "No alerts yet.";
+}
+
+function highlightRisky(text, highlights) {
+  if (!highlights || highlights.length === 0) return text;
+  let result = '';
+  let last = 0;
+  highlights.forEach(h => {
+    result += text.slice(last, h.start);
+    result += `<span style="color:#c62828;font-weight:bold;">${text.slice(h.start, h.end)}</span>`;
+    last = h.end;
+  });
+  result += text.slice(last);
+  return result;
+}
+
+function addMessage({text, sender, time, highlights, riskLevel, alerts}) {
+  const msgRow = document.createElement('div');
+  msgRow.className = 'msg-row';
+
+  // Avatar
+  let avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  if(sender === 'me') {
+    avatar.classList.add('me');
+    avatar.innerHTML = '<i class="fa-solid fa-user"></i><span class="call-icon"><i class="fa-solid fa-phone"></i></span>';
+  } else if(sender === 'friend') {
+    avatar.innerHTML = '<i class="fa-solid fa-robot"></i><span class="call-icon"><i class="fa-solid fa-phone"></i></span>';
+  } else {
+    avatar.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+  }
+
+  // Message bubble
+  let msgClass = '';
+  if (sender === 'me') msgClass = 'msg me';
+  else if (sender === 'friend') msgClass = 'msg friend';
+  else msgClass = 'msg warn';
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = msgClass;
+
+  // Highlight risky parts for friend messages
+  if (sender === 'friend' && highlights && highlights.length > 0) {
+    msgDiv.innerHTML = highlightRisky(text, highlights);
+  } else {
+    msgDiv.innerHTML = text;
+  }
+
+  // Add risk badge for alerts
+  if (sender === 'warn' && riskLevel) {
+    let badgeClass = '';
+    if (riskLevel === 'High Risk') badgeClass = 'badge high';
+    else if (riskLevel === 'Medium Risk') badgeClass = 'badge med';
+    else badgeClass = 'badge low';
+    msgDiv.innerHTML = `<span class="${badgeClass}">${riskLevel}</span>`;
+  }
+
+  // Add message text for alerts
+  if (sender === 'warn' && alerts && alerts.length > 0) {
+    msgDiv.innerHTML += `<ul class="alert-list">${alerts.map(a => `<li>⚠️ ${a}</li>`).join('')}</ul>`;
+  }
+
+  // Add timestamp
+  const ts = document.createElement('span');
+  ts.className = 'timestamp';
+  ts.textContent = time || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  msgDiv.appendChild(ts);
+
+  // Append avatar and message
+  if(sender === 'me') {
+    msgRow.appendChild(msgDiv);
+    msgRow.appendChild(avatar);
+  } else {
+    msgRow.appendChild(avatar);
+    msgRow.appendChild(msgDiv);
+  }
+  chat.appendChild(msgRow);
+
+  // Animate scroll to bottom
+  chat.scrollTo({top: chat.scrollHeight, behavior:'smooth'});
+}
+
+
+
+
+  
+function getTime() {
+  return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+
+
+async function sendMessage(){
+
+  
+  const text = input.value.trim();
+  if(!text) return;
+
+  msgCount++;
+  addMessage({text, sender:'me', time:getTime()});
+  input.value = '';
+
+  showTypingIndicator(); // Show typing...
+
+  try{
+    const res = await fetch('/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:text})
+    });
+
+    const data = await res.json();
+    const friendTime = getTime();
+
+    setTimeout(() => { // Simulate typing delay
+      hideTypingIndicator();
+      addMessage({text: data.reply, sender:'friend', time: friendTime, highlights: data.analysis.highlights});
+
+      maybeShowRestart(data.ended);
+
+      // --- Handle alerts and suggestions ---
+      // --- Handle alerts and suggestions ---
+if(data.analysis && data.analysis.alerts && data.analysis.alerts.length>0){
+  alertCount++;
+  if(data.analysis.risk_level==='High Risk'){ highCount++; }
+  const alertMsg = `${data.analysis.risk_level}: ${data.analysis.alerts.join(' • ')}`;
+  addMessage({
+    text: '',
+    sender: 'warn',
+    time: friendTime,
+    riskLevel: data.analysis.risk_level,
+    alerts: data.analysis.alerts
+  });
+  alertLogs.push(`[${friendTime}] ${alertMsg}`);
+
+  // Add animated PhishGuard suggestion message
+  const phishguardMsgRow = document.createElement('div');
+  phishguardMsgRow.className = 'msg-row';
+  const phishguardAvatar = document.createElement('div');
+  phishguardAvatar.className = 'avatar';
+  phishguardAvatar.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
+  const phishguardMsgDiv = document.createElement('div');
+  phishguardMsgDiv.className = 'msg friend';
+  phishguardMsgDiv.style.background = 'linear-gradient(90deg,#5666ff 60%,#3a47b8 100%)';
+  phishguardMsgDiv.style.color = '#fff';
+  phishguardMsgDiv.style.animation = 'shake 0.5s';
+  phishguardMsgDiv.innerHTML = `<b>PhishGuard:</b> You can answer this way: <i>"Sorry, I can't check links or share personal info."</i>`;
+  const ts = document.createElement('span');
+  ts.className = 'timestamp';
+  ts.textContent = friendTime;
+  phishguardMsgDiv.appendChild(ts);
+  phishguardMsgRow.appendChild(phishguardAvatar);
+  phishguardMsgRow.appendChild(phishguardMsgDiv);
+  chat.appendChild(phishguardMsgRow);
+  chat.scrollTo({top: chat.scrollHeight, behavior:'smooth'});
+
+  // --- SPECIAL SUGGESTION FOR INTIMATE PHOTOS ---
+  const hasIntimateRequest = data.analysis.alerts.some(a =>
+    a.toLowerCase().includes('intimate') ||
+    a.toLowerCase().includes('nude') ||
+    a.toLowerCase().includes('photo')
+  );
+  if (hasIntimateRequest) {
+    document.getElementById('suggestionText').innerText =
+      "🚫 Never share intimate photos. If someone asks, block and report them immediately.";
+  } else {
+    document.getElementById('suggestionText').innerText =
+      "⚠️ Safe reply: 'Sorry, I can't check links or share personal info.'";
+  }
+} else {
+  // If not risky, show the normal suggestion
+  document.getElementById('suggestionText').innerText = data.suggestion || '';
+}
+
+      updateDashboard();
+      chat.scrollTo({top: chat.scrollHeight, behavior:'smooth'});
+    }, 900); // 0.9s delay for realism
+
+  } catch(e){
+    hideTypingIndicator();
+    addMessage({text:"Error: Cannot reach backend", sender:'warn', time:getTime()});
+    console.error(e);
+  }
+}
+
+    
+
+// Onboarding modal logic
+
+
+
+const onboardingSteps = [
+  "PhishGuard helps you spot phishing and scam messages in real time.",
+  "Type or paste any message in the chat to see instant risk analysis.",
+  "See global phishing stats, and learn how to stay safe.",
+  "Ready? Let's get started!"
+];
+let onboardingIndex = 0;
+const onboardingModal = document.getElementById('onboardingModal');
+const onboardingText = document.getElementById('onboardingText');
+const onboardingNext = document.getElementById('onboardingNext');
+
+onboardingNext.onclick = function() {
+  onboardingIndex++;
+  if (onboardingIndex < onboardingSteps.length) {
+    onboardingText.textContent = onboardingSteps[onboardingIndex];
+    if (onboardingIndex === onboardingSteps.length - 1) onboardingNext.textContent = "Start";
+  } else {
+    onboardingModal.style.display = "none";
+    localStorage.setItem("phishguardOnboarded", "yes");
+  }
+};
+const restartBtn = document.getElementById('restartBtn');
+
+restartBtn.addEventListener('click', async function() {
+  await fetch('/reset', {method:'POST'});
+  chat.innerHTML = '';
+  msgCount = alertCount = highCount = 0;
+  alertLogs = [];
+  updateDashboard();
+  input.disabled = false;
+  sendBtn.disabled = false;
+  restartBtn.style.display = 'none';
+});
+
+// Show the restart button when conversation ends
+function maybeShowRestart(ended) {
+  if (ended) {
+    input.disabled = true;
+    sendBtn.disabled = true;
+    restartBtn.style.display = '';
+  }
+}
+// Show onboarding only on first visit
+if (localStorage.getItem("phishguardOnboarded") === "yes") {
+  onboardingModal.style.display = "none";
+}
+
+document.getElementById('analyzeLinkBtn').onclick = async function() {
+  const link = document.getElementById('linkInput').value.trim();
+  if(!link) {
+    document.getElementById('linkAnalysisResult').innerText = "Please paste a link.";
+    return;
+  }
+  document.getElementById('linkAnalysisResult').innerText = "Analyzing...";
+  try {
+    const res = await fetch('/analyze_link', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({link})
+    });
+    const data = await res.json();
+    if(data.alerts && data.alerts.length > 0) {
+      document.getElementById('linkAnalysisResult').innerHTML = `<span style="color:#c62828;font-weight:bold;">⚠️ Suspicious:</span> ${data.alerts.join('<br>')}`;
+    } else {
+      document.getElementById('linkAnalysisResult').innerHTML = `<span style="color:#2e7d32;font-weight:bold;">✔️ Safe: No suspicious patterns detected.</span>`;
+    }
+  } catch(e) {
+    document.getElementById('linkAnalysisResult').innerText = "Error analyzing link.";
+  }
+};
+
+
+// Initial greeting
+addMessage({text:"Hey! 👋 I’m your new chat friend.<br><br>To keep conversation safe and natural, PhishGuard will give you suggestions as we chat. Just type any message below and see how it works!", sender:'friend', time:getTime()});
+document.getElementById('suggestionText').innerText = "Type any message below to see instant risk analysis!";
+
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); });
+
+
+// Simple phishing quiz
+const quizQuestions = [
+  {
+    q: "You get an email from your 'bank' asking to confirm your password via a link. What should you do?",
+    options: [
+      "Click the link and enter your password.",
+      "Ignore the email or contact your bank directly.",
+      "Reply to the email and ask for more info."
+    ],
+    answer: 1
+  },
+  {
+    q: "A message says you won a prize and asks for your credit card. What is the safest action?",
+    options: [
+      "Give your card to claim the prize.",
+      "Ignore or delete the message.",
+      "Ask the sender for proof."
+    ],
+    answer: 1
+  },
+  {
+    q: "Which link is most likely a phishing attempt?",
+    options: [
+      "https://www.mybank.com/login",
+      "https://secure-login123.xyz",
+      "https://university.edu"
+    ],
+    answer: 1
+  },
+  {
+    q: "A friend sends you a file named 'invoice.pdf.exe'. What should you do?",
+    options: [
+      "Open it to see the invoice.",
+      "Ask your friend if they meant to send it, and scan for viruses.",
+      "Forward it to others."
+    ],
+    answer: 1
+  },
+  {
+    q: "You receive a message: 'Your account will be deleted unless you act now!' What is this?",
+    options: [
+      "A normal notification.",
+      "A phishing attempt using urgency.",
+      "A technical error."
+    ],
+    answer: 1
+  }
+];
+
+let quizIndex = 0, quizScore = 0;
+
+function openQuiz() {
+  quizIndex = 0; quizScore = 0;
+  document.getElementById('quizModal').style.display = 'flex';
+  showQuizQuestion();
+}
+
+function closeQuiz() {
+  document.getElementById('quizModal').style.display = 'none';
+}
+
+
+  
+
+
+
+function showTypingIndicator() {
+  // Remove if already present
+  const existing = document.getElementById('typingIndicator');
+  if (existing) existing.remove();
+
+  const typingRow = document.createElement('div');
+  typingRow.className = 'msg-row';
+  typingRow.id = 'typingIndicator';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.innerHTML = '<i class="fa-solid fa-robot fa-bounce"></i>';
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'msg friend';
+  msgDiv.innerHTML = `<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>`;
+
+  typingRow.appendChild(avatar);
+  typingRow.appendChild(msgDiv);
+  chat.appendChild(typingRow);
+  chat.scrollTo({top: chat.scrollHeight, behavior:'smooth'});
+}
+function hideTypingIndicator() {
+  const typing = document.getElementById('typingIndicator');
+  if (typing) typing.remove();
+}
+
+function showQuizQuestion() {
+  const q = quizQuestions[quizIndex];
+  let html = `<div style="margin-bottom:18px;font-size:1.1em;">${q.q}</div>`;
+  q.options.forEach((opt, i) => {
+    html += `<button onclick="answerQuiz(${i})" style="display:block;width:100%;margin:8px 0;padding:10px 0;border-radius:8px;background:#181c34;color:#e7e9ee;font-size:1em;border:1.5px solid #5666ff;cursor:pointer;">${opt}</button>`;
+  });
+  html += `<div style="margin-top:18px;font-size:0.95em;color:#aaa;">Question ${quizIndex+1} of ${quizQuestions.length}</div>`;
+  document.getElementById('quizContent').innerHTML = html;
+}
+
+function answerQuiz(selected) {
+  const q = quizQuestions[quizIndex];
+  let feedback = "";
+  if(selected === q.answer) {
+    quizScore++;
+    feedback = `<span style="color:#81c784;font-weight:bold;">Correct!</span>`;
+  } else {
+    feedback = `<span style="color:#c62828;font-weight:bold;">Incorrect.</span>`;
+  }
+  document.getElementById('quizContent').innerHTML += `<div style="margin-top:12px;">${feedback}</div>`;
+  setTimeout(() => {
+    quizIndex++;
+    if(quizIndex < quizQuestions.length) {
+      showQuizQuestion();
+    } else {
+      document.getElementById('quizContent').innerHTML = `<h3>Your score: ${quizScore} / ${quizQuestions.length} ${quizScore === quizQuestions.length ? "🎉" : quizScore >= quizQuestions.length-1 ? "👍" : "🔒"}</h3>
+      <button onclick="closeQuiz()" style="margin-top:18px;padding:10px 24px;border-radius:8px;background:#5666ff;color:#fff;font-size:1em;cursor:pointer;">Close</button>`;
+    }
+  }, 1000);
+}
+</script>
+
+<!-- Quiz Modal -->
+<div id="quizModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(20,24,40,0.96); z-index:3000; align-items:center; justify-content:center;">
+  <div style="background:#232744; color:#e7e9ee; max-width:420px; margin:auto; padding:36px 32px 28px 32px; border-radius:18px; box-shadow:0 8px 32px #0008; position:relative; text-align:center;">
+    <button onclick="closeQuiz()" style="position:absolute; top:12px; right:16px; background:none; border:none; color:#fff; font-size:1.5em; cursor:pointer;">&times;</button>
+    <h2 style="margin-top:0;">Phishing Quiz</h2>
+    <div id="quizContent"></div>
+  </div>
+</div>
+
+
+</body>
+<footer class="main-footer">
+  <div class="footer-content">
+    <div class="footer-links">
+      <button class="footer-btn" onclick="window.open('https://mail.google.com/mail/u/0/?to=your.email@example.com&su=Subject&body=Message&fs=1&tf=cm')">Contact</button>
+<button class="footer-btn" onclick="window.open('/static/cv/ArmanCV.pdf', '_blank')">CV</button>
+      <button class="footer-btn" onclick="window.open('https://www.linkedin.com/in/arman-ter-stepanyan-877639341?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app')"><i class="fa-brands fa-linkedin"></i> in</button>
+      <button class="footer-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fa-solid fa-arrow-up"></i> Top</button>
+    </div>
+    <div class="footer-info">
+        <span> <strong>armanterstepanyan0@gmail.com</strong></span>
+      <span>&copy; 2025 PhishGuard. All rights reserved.</span>
+      <span style="margin-left:18px;">Made   by Arman Ter-Stepanyan</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+.main-footer {
+  background: linear-gradient(90deg,#181c34 60%,#232744 100%);
+  color: #e7e9ee;
+  padding: 28px 0 16px 0;
+  box-shadow: 0 -2px 12px #0002;
+  margin-top: 48px;
+  font-size: 1em;
+  animation: fadeInUp 1.2s;
+}
+.footer-content {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.footer-links {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.footer-btn {
+  background: none;
+  border: none;
+  color: #e7e9ee;
+  font-size: 1em;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.footer-btn:hover, .footer-btn:focus {
+  background: linear-gradient(90deg,#5666ff 60%,#3a47b8 100%);
+  color: #fff;
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 2px 12px #5666ff44;
+}
+.footer-info {
+  margin-top: 6px;
+  font-size: 0.98em;
+  color: #a6a9c9;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  .footer-content { padding: 0 8px; }
+  .footer-links { gap: 8px; }
+  .footer-info { flex-direction: column; gap: 4px; }
+}
+</style>
+</html>
